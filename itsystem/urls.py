@@ -1,16 +1,21 @@
 from django.urls import path, include
-from .views import UserView, ProjectView, IssueView, CommentView, SignUpView, LoginView
+from rest_framework_nested import routers
+from .views import UserViewSet, ProjectViewSet, IssueViewSet, CommentViewSet, SignUpView, LoginView
 
+router = routers.DefaultRouter()
+router.register(r'projects', ProjectViewSet, basename='projects')
+
+projects_router = routers.NestedSimpleRouter(router, r'projects', lookup='project')
+projects_router.register(r'users', UserViewSet, basename='project-users')
+projects_router.register(r'issues', IssueViewSet, basename='project-issues')
+
+issues_router = routers.NestedSimpleRouter(projects_router, r'issues', lookup='issues')
+issues_router.register(r'comments', CommentViewSet, basename='comments')
 
 urlpatterns = [
 	path('signup/', SignUpView.as_view()),
     path('login/', LoginView.as_view()),
-    path('projects/', ProjectView.as_view()),
-    path('projects/<project_id>', ProjectView.as_view()),
-    path('projects/<project_id>/users/', UserView.as_view()),
-    path('projects/<project_id>/users/<user_id>', UserView.as_view()),
-    path('projects/<project_id>/issues/', IssueView.as_view()),
-    path('projects/<project_id>/issues/<issue_id>', IssueView.as_view()),
-    path('projects/<project_id>/issues/<issue_id>/comments/', CommentView.as_view()),
-    path('projects/<project_id>/issues/<issue_id>/comments/<comment_id>', CommentView.as_view()),
+    path(r'', include(router.urls)),
+    path(r'', include(projects_router.urls)),
+    path(r'', include(issues_router.urls)),
 ]

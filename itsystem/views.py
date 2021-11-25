@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -55,7 +55,7 @@ class LoginView(APIView):
 	    	return Response(res)
 
 
-class UserView(APIView):
+class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
 
@@ -63,7 +63,7 @@ class UserView(APIView):
         serializer = self.serializer_class(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class ProjectView(APIView):
+class ProjectViewSet(viewsets.ModelViewSet):
 	serializer_class = ProjectSerializer
 	permission_classes = (IsAuthenticated,)
 
@@ -93,10 +93,12 @@ class ProjectView(APIView):
 		return Response()
 
 	def delete(self, request, *args, **kwargs):
-		pass
+		project = Project.objects.filter(pk=request.project.id)
+		project.delete()
+		return Response(status=status.HTTP_204_NO_CONTENT)
 
-class IssueView(APIView):
+class IssueViewSet(viewsets.ModelViewSet):
 	pass
 
-class CommentView(APIView):
+class CommentViewSet(viewsets.ModelViewSet):
 	pass
