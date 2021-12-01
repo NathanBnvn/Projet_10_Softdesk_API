@@ -9,8 +9,8 @@ class Project(models.Model):
 	ANDROID = 'AND'
 
 	TYPE_CHOICE = [
-		(BACK_END, 'Back_end'),
-		(FRONT_END, 'Front_end'),
+		(BACK_END, 'Back-end'),
+		(FRONT_END, 'Front-end'),
 		(IOS,'IOS'),
 		(ANDROID, 'Android')
 	]
@@ -32,7 +32,7 @@ class Contributor(models.Model):
 	ROLE_CHOICE = [
 		(AUTEUR, 'Auteur'),
 		(RESPONSABLE, 'Responsable'),
-		(CREATEUR, 'Createur')
+		(CREATEUR, 'Créateur')
 	]
 
 	user_id = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -47,9 +47,9 @@ class Issue(models.Model):
 	TACHE = 'TCH'
 
 	TAG_CHOICE = [
-		(BUG, 'BUG'),
-		(AMELIORATION, 'AMÉLIORATION'),
-		(TACHE,'TÂCHE'),
+		(BUG, 'Bug'),
+		(AMELIORATION, 'Amélioration'),
+		(TACHE,'Tâche'),
 	]
 	
 	FAIBLE = 'FBL'
@@ -57,9 +57,9 @@ class Issue(models.Model):
 	ELEVE = 'ELV'
 
 	PRIORITY_CHOICE = [
-		(FAIBLE, 'FAIBLE'),
-		(MOYENNE, 'MOYENNE'),
-		(ELEVE, 'ÉLEVÉE'),
+		(FAIBLE, 'Faible'),
+		(MOYENNE, 'Moyenne'),
+		(ELEVE, 'Élevée'),
 	]
 
 	A_FAIRE = 'AFR'

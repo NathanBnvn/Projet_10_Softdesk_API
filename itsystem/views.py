@@ -2,20 +2,22 @@ from django.shortcuts import render
 
 # Create your views here.
 
+from django.contrib.auth import authenticate
+from itsystem.models import Comment, Issue, Project
 from rest_framework import generics, status, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from django.contrib.auth import authenticate
-from itsystem.models import Comment, Issue, Project
 from .serializers import UserSerializer, ProjectSerializer, IssueSerializer, CommentSerializer, SignUpSerializer
 
 # Create your views here.
 
+#---------------- A refaire -------------------------- 
 
 class SignUpView(APIView):
 	serializer_class = SignUpSerializer
+
 	def post(self, request):
 		serializer = self.serializer_class(data=request.data)
 		serializer.is_valid(raise_exception=True)
@@ -54,51 +56,66 @@ class LoginView(APIView):
 	    	res = {'error': 'please provide a email and a password'}
 	    	return Response(res)
 
+#---------------- A refaire --------------------------
 
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
 
-    def get(self, request, *args, **kwargs):
-        serializer = self.serializer_class(request.user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_queryset(self):
+        serializer = self.serializer_class(self.request.user)
+        return serializer.data
 
 class ProjectViewSet(viewsets.ModelViewSet):
 	serializer_class = ProjectSerializer
-	permission_classes = (IsAuthenticated,)
+	queryset = Project.objects.all()
+	#permission_classes = (IsAuthenticated,)
 
-	def get(self, request, *args, **kwargs):
+	def get_queryset(self):
 		try:
-			project_id = request.query_params['id'] 
+			project_id = self.request.query_params['id'] 
 
 			if project_id:
 				project = Project.objects.get(id=project_id)
 				serializer = self.serializer_class(project)
-				return Response(serializer.data, status=status.HTTP_200_OK)
+				return serializer.data
 		except:
-			projects = Project.objects.filter(author_user_id=request.user.id)
+			projects = Project.objects.filter(author_user_id=self.request.user.id)
 			serializer = self.serializer_class(projects, many=True)
+		return serializer.data
 
-		return Response(serializer.data, status=status.HTTP_200_OK)
-
-	def post(self, request, *args, **kwargs):
+	def create(self, request, *args, **kwargs):
 		serializer = self.serializer_class(data=request.data)
 		if serializer.is_valid():
+			self.perform_create(serializer)
 			serializer.save()
-			return Response(serializer.data, status=status.HTTP_201_CREATED)
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+			return Response(serializer.data)
+		return Response(serializer.errors)
 
-	def put(self, request, pk=None, *args, **kwargs):
-		project = Project.objects.filter(pk=request.project.id).update()
-		return Response()
+	def update(self, request, *args, **kwargs):
+		project = Project.objects.filter(pk=self.request.project.id)
+		project.title = self.validated_data.get('title', project.title)
+		project.description = self.validated_data.get('description', project.description)
+		project.type_project = self.validated_data.get('type_project', project.type_project)
+		project.update()
+		return project
 
-	def delete(self, request, *args, **kwargs):
-		project = Project.objects.filter(pk=request.project.id)
+	def destroy(self):
+		project = Project.objects.filter(pk=self.request.project.id)
 		project.delete()
-		return Response(status=status.HTTP_204_NO_CONTENT)
 
 class IssueViewSet(viewsets.ModelViewSet):
+	serializer_class = IssueSerializer
+	queryset = Issue.objects.all()
+	#permission_classes = (IsAuthenticated,)
+
 	pass
 
+
 class CommentViewSet(viewsets.ModelViewSet):
+	serializer_class = CommentSerializer
+	queryset = Comment.objects.all()
+	#permission_classes = (IsAuthenticated,)
+
 	pass
+
