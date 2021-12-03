@@ -3,17 +3,16 @@ from django.shortcuts import render
 # Create your views here.
 
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from itsystem.models import Comment, Issue, Project
 from rest_framework import generics, status, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import UserSerializer, ProjectSerializer, IssueSerializer, CommentSerializer, SignUpSerializer
 
-# Create your views here.
-
-#---------------- A refaire -------------------------- 
 
 class SignUpView(APIView):
 	serializer_class = SignUpSerializer
@@ -21,14 +20,20 @@ class SignUpView(APIView):
 	def post(self, request):
 		serializer = self.serializer_class(data=request.data)
 		serializer.is_valid(raise_exception=True)
-		user = serializer.save()
+		serializer.save()
 
-		return Response(serializer.data, status=status.HTTP_201_CREATED)
+		response = serializer.data
+		user = User.objects.get(email=response['email'])
+		refresh = RefreshToken.for_user(user)
+		response['refresh'] = str(refresh)
+		response['access'] = str(refresh.access_token)
+		return Response(response, status=status.HTTP_201_CREATED)
+
+#---------------- A refaire -------------------------- 
 
 class LoginView(APIView):
-	@api_view(['POST'])
 
-	def authenticate_user(request):
+	def post(self, request):
 	    try:
 	        email = request.data['email']
 	        password = request.data['password']

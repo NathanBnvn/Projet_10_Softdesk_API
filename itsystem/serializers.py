@@ -7,18 +7,18 @@ from .models import Project, Issue, Comment
 class SignUpSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = User
-		fields = ('id', 'first_name', 'last_name', 'email', 'password')
+		fields = ['id', 'first_name', 'last_name', 'email', 'password']
 		extra_kwargs = {
+			'email': {'required': True},
 			'password': {'write_only': True},
 		}
 
 		def create(self, validated_data):
-			user = User.objects.create(
-				username=validated_data['username'], 
-				password=validated_data['password'], 
+			user = User.objects.create_user( 
 				first_name=validated_data['first_name'], 
 				last_name=validated_data['last_name'], 
-				email=validated_data['email']
+				email=validated_data['email'],
+				password=validated_data['password'],
 				)
 			return user
 
@@ -29,13 +29,6 @@ class LoginSerializer(serializers.ModelSerializer):
 
 #---------------- A refaire --------------------------
 
-class UserSerializer(serializers.ModelSerializer):
-	project = ProjectSerializer()
-
-	class Meta:
-		model = User
-		fields = '__all__'
-
 
 class ProjectSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -43,14 +36,19 @@ class ProjectSerializer(serializers.ModelSerializer):
 		fields = ['id', 'title', 'description', 'type_project', 'author_user_id']
 
 
+class UserSerializer(serializers.ModelSerializer):
+
+	class Meta:
+		model = User
+		fields = '__all__'
+
+
 class IssueSerializer(serializers.ModelSerializer):
 	project = ProjectSerializer()
 
 	class Meta:
 		model = Issue
-		fields = ['id', 'title', 'desc', 'tag', 'priority', 'project_id', 'status', 'author_user_id', 'assignee_user_id', 'created_time']
-
-	pass
+		fields = ['id', 'title', 'desc', 'tag', 'priority', 'project', 'status', 'author_user_id', 'assignee_user_id', 'created_time']
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -60,4 +58,3 @@ class CommentSerializer(serializers.ModelSerializer):
 		model = Comment
 		fields = ['id', 'description', 'author_user_id', 'issue_id', 'created_time']
 
-	pass
