@@ -3,10 +3,10 @@ from django.contrib.auth.models import User
 
 
 class Project(models.Model):
-	BACK_END = 'BCK'
-	FRONT_END = 'FRT'
+	BACK_END = 'Back-end'
+	FRONT_END = 'Front-end'
 	IOS = 'IOS'
-	ANDROID = 'AND'
+	ANDROID = 'Android'
 
 	TYPE_CHOICE = [
 		(BACK_END, 'Back-end'),
@@ -17,7 +17,7 @@ class Project(models.Model):
 
 	title = models.CharField(max_length=100)
 	description = models.CharField(max_length=500)
-	type_project = models.CharField(max_length=3, choices=TYPE_CHOICE)
+	type_project = models.CharField(max_length=20, choices=TYPE_CHOICE)
 	author_user_id = models.ManyToManyField(User, through='Contributor')
 
 	def __str__(self):
@@ -25,9 +25,9 @@ class Project(models.Model):
 
 
 class Contributor(models.Model):
-	AUTEUR = 'AUT'
-	RESPONSABLE = 'RES'
-	CREATEUR = 'CRE'
+	AUTEUR = 'Auteur'
+	RESPONSABLE = 'Responsable'
+	CREATEUR = 'Créateur'
 
 	ROLE_CHOICE = [
 		(AUTEUR, 'Auteur'),
@@ -38,13 +38,13 @@ class Contributor(models.Model):
 	user_id = models.ForeignKey(User, on_delete=models.CASCADE)
 	project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
 	permission = models.CharField(max_length=3)
-	role = models.CharField(max_length=100, choices=ROLE_CHOICE)
+	role = models.CharField(max_length=20, choices=ROLE_CHOICE)
 
 
 class Issue(models.Model):
-	BUG = 'BUG'
-	AMELIORATION = 'AML'
-	TACHE = 'TCH'
+	BUG = 'Bug'
+	AMELIORATION = 'Amélioration'
+	TACHE = 'Tâche'
 
 	TAG_CHOICE = [
 		(BUG, 'Bug'),
@@ -52,19 +52,19 @@ class Issue(models.Model):
 		(TACHE,'Tâche'),
 	]
 	
-	FAIBLE = 'FBL'
-	MOYENNE = 'MOY'
-	ELEVE = 'ELV'
+	FAIBLE = 'Faible'
+	MOYENNE = 'Moyenne'
+	ELEVEE = 'Elevée'
 
 	PRIORITY_CHOICE = [
 		(FAIBLE, 'Faible'),
 		(MOYENNE, 'Moyenne'),
-		(ELEVE, 'Élevée'),
+		(ELEVEE, 'Élevée'),
 	]
 
-	A_FAIRE = 'AFR'
-	EN_COURS = 'NCR'
-	TERMINÉ = 'TRM'
+	A_FAIRE = 'À faire'
+	EN_COURS = 'En cours'
+	TERMINÉ = 'Terminé'
 
 	STATUS_CHOICE = [
 		(A_FAIRE, 'À faire'),
@@ -74,10 +74,10 @@ class Issue(models.Model):
 
 	title = models.CharField(max_length=100)
 	desc = models.CharField(max_length=100)
-	tag = models.CharField(max_length=3, choices=TAG_CHOICE)
-	priority = models.CharField(max_length=3, choices=PRIORITY_CHOICE)
+	tag = models.CharField(max_length=20, choices=TAG_CHOICE)
+	priority = models.CharField(max_length=20, choices=PRIORITY_CHOICE)
 	project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
-	status = models.CharField(max_length=3, choices=STATUS_CHOICE)
+	status = models.CharField(max_length=20, choices=STATUS_CHOICE)
 	author_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author_user_id')
 	assignee_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignee_user_id')
 	created_time = models.DateTimeField(auto_now_add=True)

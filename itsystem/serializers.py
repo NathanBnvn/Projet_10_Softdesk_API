@@ -1,36 +1,44 @@
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenObtainSerializer
 from rest_framework import serializers, permissions
 from django.contrib.auth.models import User
 from .models import Project, Issue, Comment
 
-#---------------- A refaire -------------------------- 
 
 class SignUpSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = User
-		fields = ['id', 'first_name', 'last_name', 'email', 'password']
+		fields = ['id', 'username', 'first_name', 'last_name', 'email', 'password']
 		extra_kwargs = {
 			'email': {'required': True},
 			'password': {'write_only': True},
 		}
 
-		def create(self, validated_data):
-			user = User.objects.create_user( 
-				first_name=validated_data['first_name'], 
-				last_name=validated_data['last_name'], 
-				email=validated_data['email'],
-				password=validated_data['password'],
-				)
-			return user
+	def create(self, validated_data):
+		user = User.objects.create(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name']
+            )
+
+		user.set_password(validated_data['password'])
+		user.save()
+
+		return user
 
 
-class LoginSerializer(serializers.ModelSerializer):
-	class Meta:
-		pass
+class LoginSerializer(TokenObtainPairSerializer):
+	# @TO DO fix login
 
-#---------------- A refaire --------------------------
+	@classmethod
+	def get_token(cls, user):
+		token = super().get_token(user)
+		token['password'] = user.password
+		return token
 
 
 class ProjectSerializer(serializers.ModelSerializer):
+
 	class Meta:
 		model = Project
 		fields = ['id', 'title', 'description', 'type_project', 'author_user_id']

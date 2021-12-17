@@ -1,17 +1,16 @@
 from django.shortcuts import render
-
-# Create your views here.
-
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
 from itsystem.models import Comment, Issue, Project
 from rest_framework import generics, status, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSerializer, ProjectSerializer, IssueSerializer, CommentSerializer, SignUpSerializer
+from .serializers import UserSerializer, ProjectSerializer, IssueSerializer, CommentSerializer, SignUpSerializer, LoginSerializer
 
 
 class SignUpView(APIView):
@@ -29,98 +28,81 @@ class SignUpView(APIView):
 		response['access'] = str(refresh.access_token)
 		return Response(response, status=status.HTTP_201_CREATED)
 
-#---------------- A refaire -------------------------- 
 
-class LoginView(APIView):
+class LoginView(TokenObtainPairView):
+	serializer_class = LoginSerializer
+	permission_classes = (AllowAny,)
 
-	def post(self, request):
-	    try:
-	        email = request.data['email']
-	        password = request.data['password']
-
-	        user = User.objects.get(email=email, password=password)
-	        if user:
-	        		try:
-	        			payload = jwt_payload_handler(user)
-	        			token = jwt.encode(payload, settings.SECRET_KEY)
-	        			user_details = {}
-	        			user_details['name'] = "%s %s" % (
-	        				user.first_name, user.last_name)
-	        			user_details['token'] = token
-	        			user_logged_in.send(sender=user.__class__,
-	        				request=request, user=user)
-	        			return Response(user_details, status=status.HTTP_200_OK)
-
-	        		except Exception as exc:
-		            		raise exc
-	        else:
-	        	res = {'error': 'cannot authenticate with the given credentials or the account has been deactivated'}
-	        	return Response(res, status=status.HTTP_403_FORBIDDEN)
-
-	    except KeyError:
-	    	res = {'error': 'please provide a email and a password'}
-	    	return Response(res)
-
-#---------------- A refaire --------------------------
 
 class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = (IsAuthenticated,)
     serializer_class = UserSerializer
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticated,)
 
-    def get_queryset(self):
-        serializer = self.serializer_class(self.request.user)
-        return serializer.data
+    def list(self, request):
+        serializer = self.serializer_class(self.queryset, many=True)
+        return Response(serializer.data)
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
 	serializer_class = ProjectSerializer
 	queryset = Project.objects.all()
-	#permission_classes = (IsAuthenticated,)
+	permission_classes = (IsAuthenticated,)
 
-	def get_queryset(self):
-		try:
-			project_id = self.request.query_params['id'] 
-
-			if project_id:
-				project = Project.objects.get(id=project_id)
-				serializer = self.serializer_class(project)
-				return serializer.data
-		except:
-			projects = Project.objects.filter(author_user_id=self.request.user.id)
-			serializer = self.serializer_class(projects, many=True)
-		return serializer.data
-
-	def create(self, request, *args, **kwargs):
+	def create(self, request):
 		serializer = self.serializer_class(data=request.data)
 		if serializer.is_valid():
 			self.perform_create(serializer)
-			serializer.save()
+			serializer.save(author_user_id=request.user.id)
 			return Response(serializer.data)
 		return Response(serializer.errors)
 
-	def update(self, request, *args, **kwargs):
-		project = Project.objects.filter(pk=self.request.project.id)
-		project.title = self.validated_data.get('title', project.title)
-		project.description = self.validated_data.get('description', project.description)
-		project.type_project = self.validated_data.get('type_project', project.type_project)
-		project.update()
-		return project
+	def list(self, request):
+		serializer = self.serializer_class(self.queryset, many=True)
+		return Response(serializer.data)
 
-	def destroy(self):
-		project = Project.objects.filter(pk=self.request.project.id)
+	def retrieve(self, request, pk=None):
+		project = get_object_or_404(self.queryset, pk=pk)
+		serializer = self.serializer_class(project)
+		return Response(serializer.data)
+
+	def partial_update(self, request, pk=None):
+		project = get_object_or_404(self.queryset, pk=pk)
+		project.title = request.data.get('title')
+		project.description = request.data.get('description')
+		project.type_project = request.data.get('type_project')
+
+		serializer = self.serializer_class(project, data=request.data, partial=True)
+		serializer.is_valid(raise_exception=True)
+		self.perform_update(serializer)
+		return Response(serializer.data)
+
+	def update(self, request, pk=None):
+		project = get_object_or_404(self.queryset, pk=pk)
+		project.title = request.data.get('title')
+		project.description = request.data.get('description')
+		project.type_project = request.data.get('type_project')
+
+		serializer = self.serializer_class(project, data=request.data)
+		serializer.is_valid(raise_exception=True)
+		self.perform_update(serializer)
+		return Response(serializer.data)
+
+	def destroy(self, request, pk=None):
+		project = get_object_or_404(self.queryset, pk=pk)
 		project.delete()
+		return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class IssueViewSet(viewsets.ModelViewSet):
 	serializer_class = IssueSerializer
 	queryset = Issue.objects.all()
-	#permission_classes = (IsAuthenticated,)
-
-	pass
+	permission_classes = (IsAuthenticated,)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
 	serializer_class = CommentSerializer
 	queryset = Comment.objects.all()
-	#permission_classes = (IsAuthenticated,)
+	permission_classes = (IsAuthenticated,)
 
-	pass
 
