@@ -1,4 +1,5 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenObtainSerializer
+from rest_framework.fields import CurrentUserDefault
 from rest_framework import serializers, permissions
 from django.contrib.auth.models import User
 from .models import Project, Issue, Comment
@@ -28,7 +29,6 @@ class SignUpSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(TokenObtainPairSerializer):
-	# @TO DO fix login
 
 	@classmethod
 	def get_token(cls, user):
@@ -37,18 +37,21 @@ class LoginSerializer(TokenObtainPairSerializer):
 		return token
 
 
-class ProjectSerializer(serializers.ModelSerializer):
-
-	class Meta:
-		model = Project
-		fields = ['id', 'title', 'description', 'type_project', 'author_user_id']
-
-
 class UserSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = User
 		fields = '__all__'
+
+
+class ProjectSerializer(serializers.ModelSerializer):
+	author_user_id = serializers.StringRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
+	print(author_user_id)
+
+
+	class Meta:
+		model = Project
+		fields = ['id', 'title', 'description', 'type_project', 'author_user_id']
 
 
 class IssueSerializer(serializers.ModelSerializer):
