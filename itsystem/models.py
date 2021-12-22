@@ -18,7 +18,8 @@ class Project(models.Model):
 	title = models.CharField(max_length=100)
 	description = models.CharField(max_length=500)
 	type_project = models.CharField(max_length=20, choices=TYPE_CHOICE)
-	author_user_id = models.ManyToManyField(User, through='Contributor')
+	contributors = models.ManyToManyField(User, through='Contributor')
+	author_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
 
 	def __str__(self):
 		return self.title
@@ -35,11 +36,12 @@ class Contributor(models.Model):
 		(CREATEUR, 'Créateur')
 	]
 
-	user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-	project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
-	permission = models.CharField(max_length=3)
-	role = models.CharField(max_length=20, choices=ROLE_CHOICE)
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	project = models.ForeignKey(Project, on_delete=models.CASCADE)
+	permission = models.CharField(max_length=20, choices=ROLE_CHOICE)
+	role = models.CharField(max_length=20)
 
+# @TODO set unique user with meta in Contributor
 
 class Issue(models.Model):
 	BUG = 'Bug'
@@ -76,10 +78,10 @@ class Issue(models.Model):
 	desc = models.CharField(max_length=100)
 	tag = models.CharField(max_length=20, choices=TAG_CHOICE)
 	priority = models.CharField(max_length=20, choices=PRIORITY_CHOICE)
-	project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
+	project = models.ForeignKey(Project, on_delete=models.CASCADE)
 	status = models.CharField(max_length=20, choices=STATUS_CHOICE)
-	author_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author_user_id')
-	assignee_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignee_user_id')
+	author_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author')
+	assignee_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assigned')
 	created_time = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):

@@ -45,13 +45,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-	author_user_id = serializers.StringRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
-	print(author_user_id)
-
+	author_user = serializers.StringRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
 
 	class Meta:
 		model = Project
-		fields = ['id', 'title', 'description', 'type_project', 'author_user_id']
+		fields = '__all__'
 
 
 class IssueSerializer(serializers.ModelSerializer):
@@ -59,7 +57,7 @@ class IssueSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Issue
-		fields = ['id', 'title', 'desc', 'tag', 'priority', 'project', 'status', 'author_user_id', 'assignee_user_id', 'created_time']
+		fields = '__all__'
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -67,5 +65,5 @@ class CommentSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Comment
-		fields = ['id', 'description', 'author_user_id', 'issue_id', 'created_time']
+		fields = '__all__'
 
