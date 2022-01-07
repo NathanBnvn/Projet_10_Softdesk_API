@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from itsystem.models import Comment, Issue, Project
+from itsystem.models import Comment, Issue, Project, Contributor
 from rest_framework import generics, status, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -10,7 +10,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import UserSerializer, ProjectSerializer, IssueSerializer, CommentSerializer, SignUpSerializer, LoginSerializer
+from .permissions import IsAuthor, IsContributor
+from .serializers import ContributorSerializer, ProjectSerializer, IssueSerializer, CommentSerializer, SignUpSerializer, LoginSerializer
 
 
 class SignUpView(APIView):
@@ -34,27 +35,33 @@ class LoginView(TokenObtainPairView):
 	permission_classes = (AllowAny,)
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-    permission_classes = (IsAuthenticated,)
+# class UserViewSet(viewsets.ModelViewSet):
+#     queryset = User.objects.all()
+#     serializer_class = UserSerializer
+#     permission_classes = (IsAuthenticated,)
+
+
+class ContributorViewSet(viewsets.ModelViewSet):
+	queryset = Contributor.objects.all()
+	serializer_class = ContributorSerializer
+	permission_classes = (IsAuthor, IsContributor)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
-	serializer_class = ProjectSerializer
 	queryset = Project.objects.all()
-	permission_classes = (IsAuthenticated,)
+	serializer_class = ProjectSerializer
+	permission_classes = (IsAuthor, IsContributor)
 
 
 class IssueViewSet(viewsets.ModelViewSet):
-	serializer_class = IssueSerializer
 	queryset = Issue.objects.all()
-	permission_classes = (IsAuthenticated,)
+	serializer_class = IssueSerializer
+	permission_classes = (IsAuthor, IsContributor)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-	serializer_class = CommentSerializer
 	queryset = Comment.objects.all()
-	permission_classes = (IsAuthenticated,)
+	serializer_class = CommentSerializer
+	permission_classes = (IsAuthor, IsContributor)
 
 

@@ -1,13 +1,13 @@
 from django.urls import path, include
 from rest_framework_nested import routers
 from rest_framework_simplejwt.views import TokenRefreshView
-from .views import UserViewSet, ProjectViewSet, IssueViewSet, CommentViewSet, SignUpView, LoginView
+from .views import ContributorViewSet, ProjectViewSet, IssueViewSet, CommentViewSet, SignUpView, LoginView
 
 router = routers.DefaultRouter()
 router.register(r'projects', ProjectViewSet, basename='projects')
 
 projects_router = routers.NestedSimpleRouter(router, r'projects', lookup='project')
-projects_router.register(r'users', UserViewSet, basename='project-users')
+projects_router.register(r'users', ContributorViewSet, basename='project-users')
 projects_router.register(r'issues', IssueViewSet, basename='project-issues')
 
 issues_router = routers.NestedSimpleRouter(projects_router, r'issues', lookup='issues')
