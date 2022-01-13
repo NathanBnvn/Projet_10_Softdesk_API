@@ -1,6 +1,7 @@
 from rest_framework import permissions
 
 class IsAuthor(permissions.BasePermission):
+	# Author has access to CRUD methods 
 
 	def has_permission(self, request, view):
 		if request.user.is_authenticated:

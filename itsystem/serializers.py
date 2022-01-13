@@ -15,16 +15,9 @@ class SignUpSerializer(serializers.ModelSerializer):
 		}
 
 	def create(self, validated_data):
-		user = User.objects.create(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name']
-            )
-
+		user = User.objects.create(**validated_data)
 		user.set_password(validated_data['password'])
 		user.save()
-
 		return user
 
 
@@ -36,11 +29,6 @@ class LoginSerializer(TokenObtainPairSerializer):
 		token['password'] = user.password
 		return token
 
-# class UserSerializer(serializers.ModelSerializer):
-
-# 	class Meta:
-# 		model = User
-# 		fields = '__all__'
 
 class ContributorSerializer(serializers.ModelSerializer):
 
@@ -50,11 +38,25 @@ class ContributorSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-	author_user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
+	# Create a custom method field
+	author_user = serializers.SerializerMethodField('_user')
+
+    # Use this method for the custom field
+
+	def _user(self, obj):
+		request = self.context.get('request', None)
+		if request:
+			return request.user
 
 	class Meta:
 		model = Project
 		fields = '__all__'
+		read_only_fields = ['author_user']
+
+	def create(self, validated_data):
+	 	project = Project.objects.create(**validated_data)
+	 	project.author_user = self.context['request'].user
+	 	return project.save()
 
 
 class IssueSerializer(serializers.ModelSerializer):

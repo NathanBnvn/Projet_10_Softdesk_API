@@ -35,16 +35,10 @@ class LoginView(TokenObtainPairView):
 	permission_classes = (AllowAny,)
 
 
-# class UserViewSet(viewsets.ModelViewSet):
-#     queryset = User.objects.all()
-#     serializer_class = UserSerializer
-#     permission_classes = (IsAuthenticated,)
-
-
 class ContributorViewSet(viewsets.ModelViewSet):
 	queryset = Contributor.objects.all()
 	serializer_class = ContributorSerializer
-	permission_classes = (IsAuthor, IsContributor)
+	permission_classes = (IsAuthor)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
@@ -63,5 +57,4 @@ class CommentViewSet(viewsets.ModelViewSet):
 	queryset = Comment.objects.all()
 	serializer_class = CommentSerializer
 	permission_classes = (IsAuthor, IsContributor)
-
 
