@@ -14,14 +14,16 @@ class IsAuthor(permissions.BasePermission):
 		if request.method in permissions.SAFE_METHODS:
 			return True
 
-		if obj.author == request.user:
+		if obj.author_user == request.user:
 			return True
+
+		return False
 
 
 class IsContributor(permissions.BasePermission):
 	# Contributor are not allow to Update or Delete project, issue or comment instances
 
-	modify_methods = ("PUT", "PATCH", "DEL")
+	editing_methods = ("PUT", "PATCH", "DEL")
 
 	def has_permission(self, request, view):
 		if request.user.is_authenticated:
@@ -34,7 +36,7 @@ class IsContributor(permissions.BasePermission):
 		if request.method in permissions.SAFE_METHODS:
 			return True
 
-		if obj.author != request.user and request.methods not in self.modify_methods:
+		if obj.author_user != request.user and request.methods not in self.editing_methods:
 			return True
 
 		return False

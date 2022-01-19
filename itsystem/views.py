@@ -38,23 +38,23 @@ class LoginView(TokenObtainPairView):
 class ContributorViewSet(viewsets.ModelViewSet):
 	queryset = Contributor.objects.all()
 	serializer_class = ContributorSerializer
-	permission_classes = (IsAuthor)
+	permission_classes = (IsAuthor,)
 
 
 class ProjectViewSet(viewsets.ModelViewSet):
 	queryset = Project.objects.all()
 	serializer_class = ProjectSerializer
-	permission_classes = (IsAuthor, IsContributor)
+	permission_classes = (IsAuthor, IsContributor,)
 
 
 class IssueViewSet(viewsets.ModelViewSet):
 	queryset = Issue.objects.all()
 	serializer_class = IssueSerializer
-	permission_classes = (IsAuthor, IsContributor)
+	permission_classes = (IsAuthor, IsContributor,)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
 	queryset = Comment.objects.all()
 	serializer_class = CommentSerializer
-	permission_classes = (IsAuthor, IsContributor)
+	permission_classes = (IsAuthor, IsContributor,)
 

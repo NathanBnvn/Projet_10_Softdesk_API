@@ -38,15 +38,6 @@ class ContributorSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-	# Create a custom method field
-	author_user = serializers.SerializerMethodField('_user')
-
-    # Use this method for the custom field
-
-	def _user(self, obj):
-		request = self.context.get('request', None)
-		if request:
-			return request.user
 
 	class Meta:
 		model = Project
@@ -56,15 +47,26 @@ class ProjectSerializer(serializers.ModelSerializer):
 	def create(self, validated_data):
 	 	project = Project.objects.create(**validated_data)
 	 	project.author_user = self.context['request'].user
-	 	return project.save()
+	 	project.save()
+	 	Contributor.objects.create(user=project.author_user, project=project, permission='Auteur', role='Author')
+	 	return project
 
 
 class IssueSerializer(serializers.ModelSerializer):
-	project = ProjectSerializer()
+	#project = ProjectSerializer()
+	#project = serializers.PrimaryKeyRelatedField(read_only=True)
 
 	class Meta:
 		model = Issue
 		fields = '__all__'
+		depth = 1
+
+	def create(self, validated_data):
+		issue = Issue.objects.create(**validated_data)
+		issue.author_user = self.context['request'].user
+		issue.assignee_user = self.context['request'].user
+		#issue.save()
+		return issue
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -73,4 +75,11 @@ class CommentSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Comment
 		fields = '__all__'
+
+	def create(self, validated_data):
+		comment = Comment.objects.create(**validated_data)
+		#comment.issue = Issue.objects.get()
+		comment.author_user = self.context['request'].user
+		comment.save()
+		return comment
 

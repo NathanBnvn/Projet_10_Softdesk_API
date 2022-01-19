@@ -18,7 +18,7 @@ class Project(models.Model):
 	title = models.CharField(max_length=100)
 	description = models.CharField(max_length=500)
 	type_project = models.CharField(max_length=20, choices=TYPE_CHOICE)
-	author_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
+	author_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='projects')
 	contributors = models.ManyToManyField(User, through='Contributor')
 
 	def __str__(self):
@@ -76,10 +76,10 @@ class Issue(models.Model):
 	desc = models.CharField(max_length=1000)
 	tag = models.CharField(max_length=20, choices=TAG_CHOICE)
 	priority = models.CharField(max_length=20, choices=PRIORITY_CHOICE)
-	project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='issue')
+	project = models.ForeignKey(Project, blank=True, null=True, on_delete=models.CASCADE, related_name='issue')
 	status = models.CharField(max_length=20, choices=STATUS_CHOICE)
-	author_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='author')
-	assignee_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='assignee')
+	author_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='author')
+	assignee_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='assignee')
 	created_time = models.DateTimeField(auto_now_add=True)
 
 	def __str__(self):
@@ -88,7 +88,7 @@ class Issue(models.Model):
 
 class Comment(models.Model):
 	description = models.CharField(max_length=700)
-	author_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comment')
+	author_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='comment')
 	issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='comment')
 	created_time = models.DateTimeField(auto_now_add=True)
 
