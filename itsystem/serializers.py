@@ -3,6 +3,7 @@ from rest_framework.fields import CurrentUserDefault
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Project, Issue, Comment, Contributor
+from rest_framework_nested.relations import NestedHyperlinkedRelatedField
 
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -35,6 +36,13 @@ class ContributorSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Contributor
 		fields = '__all__'
+		read_only_fields = ['project']
+
+	def create(self, validated_data):
+		contributor = Contributor.objects.create(**validated_data)
+		contributor.project = Project.objects.get(pk=self.context['view'].kwargs['project_pk'])
+		#contributor.save()
+		return contributor
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -53,16 +61,15 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class IssueSerializer(serializers.ModelSerializer):
-	#project = ProjectSerializer()
-	#project = serializers.PrimaryKeyRelatedField(read_only=True)
 
 	class Meta:
 		model = Issue
 		fields = '__all__'
-		depth = 1
+		read_only_fields = ['project','author_user', 'assignee_user']
 
 	def create(self, validated_data):
 		issue = Issue.objects.create(**validated_data)
+		issue.project = Project.objects.get(pk=self.context['view'].kwargs['project_pk'])
 		issue.author_user = self.context['request'].user
 		issue.assignee_user = self.context['request'].user
 		#issue.save()
@@ -70,16 +77,16 @@ class IssueSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-	issue = IssueSerializer()
 
 	class Meta:
 		model = Comment
 		fields = '__all__'
+		read_only_fields = ['issue', 'author_user']
 
 	def create(self, validated_data):
 		comment = Comment.objects.create(**validated_data)
-		#comment.issue = Issue.objects.get()
+		comment.issue = Issue.objects.get(pk=self.context['view'].kwargs['issues_pk'])
 		comment.author_user = self.context['request'].user
-		comment.save()
+		#comment.save()
 		return comment
 

@@ -3,16 +3,16 @@ from django.contrib.auth.models import User
 
 
 class Project(models.Model):
-	BACK_END = 'Back-end'
-	FRONT_END = 'Front-end'
-	IOS = 'IOS'
-	ANDROID = 'Android'
+	BACK_END = 'back-end'
+	FRONT_END = 'front-end'
+	IOS = 'ios'
+	ANDROID = 'android'
 
 	TYPE_CHOICE = [
-		(BACK_END, 'Back-end'),
-		(FRONT_END, 'Front-end'),
-		(IOS,'IOS'),
-		(ANDROID, 'Android')
+		(BACK_END, 'back-end'),
+		(FRONT_END, 'front-end'),
+		(IOS,'ios'),
+		(ANDROID, 'android')
 	]
 
 	title = models.CharField(max_length=100)
@@ -26,50 +26,53 @@ class Project(models.Model):
 
 
 class Contributor(models.Model):
-	AUTEUR = 'Auteur'
-	CONTRIBUTEUR = 'Contributeur'
+	AUTEUR = 'auteur'
+	CONTRIBUTEUR = 'contributeur'
 
-	ROLE_CHOICE = [
-		(AUTEUR, 'Auteur'),
-		(CONTRIBUTEUR, 'Contributeur'),
+	PERMISSION_CHOICE = [
+		(AUTEUR, 'auteur'),
+		(CONTRIBUTEUR, 'contributeur'),
 	]
 
 	user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='contributor')
-	project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='contributor')
-	permission = models.CharField(max_length=20, choices=ROLE_CHOICE)
+	project = models.ForeignKey(Project, blank=True, null=True, on_delete=models.CASCADE, related_name='contributor')
+	permission = models.CharField(max_length=20, choices=PERMISSION_CHOICE)
 	role = models.CharField(max_length=20)
+
+	#class Meta:
+		#constraints = [models.UniqueConstraint(fields=['user_id'], name="user")]
 
 # @TODO set unique user with meta in Contributor
 
 class Issue(models.Model):
-	BUG = 'Bug'
-	AMELIORATION = 'Amélioration'
-	TACHE = 'Tâche'
+	BUG = 'bug'
+	AMELIORATION = 'amélioration'
+	TACHE = 'tâche'
 
 	TAG_CHOICE = [
-		(BUG, 'Bug'),
-		(AMELIORATION, 'Amélioration'),
-		(TACHE,'Tâche'),
+		(BUG, 'bug'),
+		(AMELIORATION, 'amélioration'),
+		(TACHE,'tâche'),
 	]
 	
-	FAIBLE = 'Faible'
-	MOYENNE = 'Moyenne'
-	ELEVEE = 'Elevée'
+	FAIBLE = 'faible'
+	MOYENNE = 'moyenne'
+	ELEVEE = 'élevée'
 
 	PRIORITY_CHOICE = [
-		(FAIBLE, 'Faible'),
-		(MOYENNE, 'Moyenne'),
-		(ELEVEE, 'Élevée'),
+		(FAIBLE, 'faible'),
+		(MOYENNE, 'moyenne'),
+		(ELEVEE, 'élevée'),
 	]
 
-	A_FAIRE = 'À faire'
-	EN_COURS = 'En cours'
-	TERMINÉ = 'Terminé'
+	A_FAIRE = 'a faire'
+	EN_COURS = 'en cours'
+	TERMINÉ = 'terminé'
 
 	STATUS_CHOICE = [
-		(A_FAIRE, 'À faire'),
-		(EN_COURS, 'En Cours'),
-		(TERMINÉ, 'Terminé'),
+		(A_FAIRE, 'a faire'),
+		(EN_COURS, 'en Cours'),
+		(TERMINÉ, 'terminé'),
 	]
 
 	title = models.CharField(max_length=100)
@@ -89,6 +92,6 @@ class Issue(models.Model):
 class Comment(models.Model):
 	description = models.CharField(max_length=700)
 	author_user = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name='comment')
-	issue = models.ForeignKey(Issue, on_delete=models.CASCADE, related_name='comment')
+	issue = models.ForeignKey(Issue, blank=True, null=True, on_delete=models.CASCADE, related_name='comment')
 	created_time = models.DateTimeField(auto_now_add=True)
 

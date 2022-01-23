@@ -35,26 +35,72 @@ class LoginView(TokenObtainPairView):
 	permission_classes = (AllowAny,)
 
 
-class ContributorViewSet(viewsets.ModelViewSet):
-	queryset = Contributor.objects.all()
-	serializer_class = ContributorSerializer
-	permission_classes = (IsAuthor,)
-
-
 class ProjectViewSet(viewsets.ModelViewSet):
-	queryset = Project.objects.all()
 	serializer_class = ProjectSerializer
 	permission_classes = (IsAuthor, IsContributor,)
 
+	def get_queryset(self):
+		return Project.objects.filter(contributors=self.request.user)
+
+
+class ContributorViewSet(viewsets.ModelViewSet):
+	serializer_class = ContributorSerializer
+	permission_classes = (IsAuthor,)
+
+	def dispatch(self, request, *args, **kwargs):
+		parent_view = ProjectViewSet.as_view({"get": "retrieve"})
+		original_method = request.method
+		request.method = "GET"
+		parent_kwargs = {"pk": kwargs["project_pk"]}
+
+		parent_response = parent_view(request, *args, **parent_kwargs)
+		if parent_response.exception:
+			return parent_response
+
+		request.method = original_method
+		return super().dispatch(request, *args, **kwargs)
+
+	def get_queryset(self):
+		return Contributor.objects.filter(project=self.kwargs['project_pk'])
 
 class IssueViewSet(viewsets.ModelViewSet):
-	queryset = Issue.objects.all()
 	serializer_class = IssueSerializer
 	permission_classes = (IsAuthor, IsContributor,)
 
+	def dispatch(self, request, *args, **kwargs):
+		parent_view = ProjectViewSet.as_view({"get": "retrieve"})
+		original_method = request.method
+		request.method = "GET"
+		parent_kwargs = {"pk": kwargs["project_pk"]}
+
+		parent_response = parent_view(request, *args, **parent_kwargs)
+		if parent_response.exception:
+			return parent_response
+
+		request.method = original_method
+		return super().dispatch(request, *args, **kwargs)
+
+	def get_queryset(self):
+		return Issue.objects.filter(project=self.kwargs['project_pk'])
+
 
 class CommentViewSet(viewsets.ModelViewSet):
-	queryset = Comment.objects.all()
 	serializer_class = CommentSerializer
 	permission_classes = (IsAuthor, IsContributor,)
+
+	def dispatch(self, request, *args, **kwargs):
+		parent_view = ProjectViewSet.as_view({"get": "retrieve"})
+		original_method = request.method
+		request.method = "GET"
+		parent_kwargs = {"pk": kwargs["project_pk"]}
+
+		parent_response = parent_view(request, *args, **parent_kwargs)
+		if parent_response.exception:
+			return parent_response
+
+		request.method = original_method
+		return super().dispatch(request, *args, **kwargs)
+
+	def get_queryset(self):
+		return Comment.objects.filter(issue=self.kwargs['issues_pk'])
 
