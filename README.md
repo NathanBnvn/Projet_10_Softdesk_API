@@ -1,5 +1,7 @@
 # Softdesk REST API
 
+![badge](https://img.shields.io/badge/MADE-Django%20REST-red?style=for-the-badge&logo=appveyor) ![badge](https://img.shields.io/badge/USE-JSON%20WEB%20TOKEN-brightgreen?style=for-the-badge&logo=appveyor)![badge](https://img.shields.io/badge/Running%20it%20with-Postman-orange?style=for-the-badge&logo=appveyor)
+
 This project is Django REST API an issue tracking app for all three platforms (website, Android and iOS apps).
 The app allow users to create various projects, add users to specific projects, create issues within projects, and assign labels to those issues based on their priorities, tags, etc and to add comments on the issues.
 
@@ -43,5 +45,7 @@ To make it easier, install the necessary modules:
 ```
 
 The API is not hosted and runs locally.
-Once the server is launched, enter in Postman or likewise program, the generated url in the terminal:
+Once the server is launched, enter in Postman, the generated url in the terminal:
 http://127.0.0.1:8000/
+
+Follow the documentation to fully understand how to use this API
