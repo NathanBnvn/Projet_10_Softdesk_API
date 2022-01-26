@@ -7,8 +7,8 @@ router = routers.DefaultRouter()
 router.register(r'projects', ProjectViewSet, basename='projects')
 
 projects_router = routers.NestedSimpleRouter(router, r'projects', lookup='project')
-projects_router.register(r'users', ContributorViewSet, basename='project-users')
-projects_router.register(r'issues', IssueViewSet, basename='project-issues')
+projects_router.register(r'users', ContributorViewSet, basename='contributors')
+projects_router.register(r'issues', IssueViewSet, basename='issues')
 
 issues_router = routers.NestedSimpleRouter(projects_router, r'issues', lookup='issues')
 issues_router.register(r'comments', CommentViewSet, basename='comments')

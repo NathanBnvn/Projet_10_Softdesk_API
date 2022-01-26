@@ -37,15 +37,20 @@ class LoginView(TokenObtainPairView):
 
 class ProjectViewSet(viewsets.ModelViewSet):
 	serializer_class = ProjectSerializer
-	permission_classes = (IsAuthor, IsContributor,)
+
 
 	def get_queryset(self):
 		return Project.objects.filter(contributors=self.request.user)
 
+	def get_permissions(self):
+		if self.action in ("list", "retrieve"):
+			self.permission_classes = [IsContributor]
+		elif self.action in ("update", "destroy"):
+			self.permission_classes = [IsAuthor]
+		return super(self.__class__, self).get_permissions()
 
 class ContributorViewSet(viewsets.ModelViewSet):
 	serializer_class = ContributorSerializer
-	permission_classes = (IsAuthor,)
 
 	def dispatch(self, request, *args, **kwargs):
 		parent_view = ProjectViewSet.as_view({"get": "retrieve"})
@@ -62,6 +67,11 @@ class ContributorViewSet(viewsets.ModelViewSet):
 
 	def get_queryset(self):
 		return Contributor.objects.filter(project=self.kwargs['project_pk'])
+
+	def get_permissions(self):
+		if self.action in ("list", "retrieve", "create", "destroy"):
+			self.permission_classes = [IsContributor]
+		return super(self.__class__, self).get_permissions()
 
 class IssueViewSet(viewsets.ModelViewSet):
 	serializer_class = IssueSerializer
@@ -83,6 +93,13 @@ class IssueViewSet(viewsets.ModelViewSet):
 	def get_queryset(self):
 		return Issue.objects.filter(project=self.kwargs['project_pk'])
 
+	def get_permissions(self):
+		if self.action in ("list", "retrieve", "create"):
+			self.permission_classes = [IsContributor]
+		elif self.action in ("update", "destroy"):
+			self.permission_classes = [IsAuthor]
+		return super(self.__class__, self).get_permissions()
+
 
 class CommentViewSet(viewsets.ModelViewSet):
 	serializer_class = CommentSerializer
@@ -103,4 +120,11 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 	def get_queryset(self):
 		return Comment.objects.filter(issue=self.kwargs['issues_pk'])
+
+	def get_permissions(self):
+		if self.action in ("list", "retrieve", "create"):
+			self.permission_classes = [IsContributor]
+		elif self.action in ("update", "destroy"):
+			self.permission_classes = [IsAuthor]
+		return super(self.__class__, self).get_permissions()
 

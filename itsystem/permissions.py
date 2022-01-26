@@ -14,12 +14,6 @@ class IsAuthor(permissions.BasePermission):
 				return True
 
 	def has_object_permission(self, request, view, obj):
-		if request.user.is_superuser:
-			return True
-
-		if request.method in permissions.SAFE_METHODS:
-			return True
-
 		if obj.author_user == request.user:
 			return True
 
@@ -47,12 +41,13 @@ class IsContributor(permissions.BasePermission):
 				return True
 
 
-	def has_object_permission(self, request, view, obj):
-		if request.user.is_superuser:
-			return True
+	# def has_object_permission(self, request, view, obj):
+	# 	contributors_methods = ("GET", "POST")
 
-		if request.method in permissions.SAFE_METHODS:
-			return True
+	# 	if request.method == contributors_methods:
+	# 		return True
+	# 	if request.user.is_superuser:
+	# 		return True
 
-		if obj.author_user != request.user and request.method not in editing_methods:
-			return True
+	# 	if obj.author_user != request.user and request.method not in editing_methods:
+	# 		return True

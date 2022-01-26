@@ -41,7 +41,7 @@ class ContributorSerializer(serializers.ModelSerializer):
 	def create(self, validated_data):
 		contributor = Contributor.objects.create(**validated_data)
 		contributor.project = Project.objects.get(pk=self.context['view'].kwargs['project_pk'])
-		#contributor.save()
+		contributor.save()
 		return contributor
 
 
@@ -72,7 +72,7 @@ class IssueSerializer(serializers.ModelSerializer):
 		issue.project = Project.objects.get(pk=self.context['view'].kwargs['project_pk'])
 		issue.author_user = self.context['request'].user
 		issue.assignee_user = self.context['request'].user
-		#issue.save()
+		issue.save()
 		return issue
 
 
@@ -87,6 +87,6 @@ class CommentSerializer(serializers.ModelSerializer):
 		comment = Comment.objects.create(**validated_data)
 		comment.issue = Issue.objects.get(pk=self.context['view'].kwargs['issues_pk'])
 		comment.author_user = self.context['request'].user
-		#comment.save()
+		comment.save()
 		return comment
 
